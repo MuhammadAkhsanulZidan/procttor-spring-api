@@ -1,5 +1,7 @@
 package com.procttor.api.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,6 +19,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserWorkspace>userWorkspaces; 
 
     public User(){
 
