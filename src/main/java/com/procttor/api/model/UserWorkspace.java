@@ -17,6 +17,9 @@ public class UserWorkspace {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
+    @Column(name = "role")
+    private int roleId;
+
     public UserWorkspace(){
 
     }
@@ -48,5 +51,13 @@ public class UserWorkspace {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
+    }
+
+    public int getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(int role) {
+        this.roleId = role;
     }
 }
