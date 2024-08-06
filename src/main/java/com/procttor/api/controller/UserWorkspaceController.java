@@ -1,31 +1,54 @@
 package com.procttor.api.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.procttor.api.dto.UserWorkspaceDTO;
+import com.procttor.api.model.User;
 import com.procttor.api.model.UserWorkspace;
+import com.procttor.api.model.Workspace;
+import com.procttor.api.repository.UserRepository;
 import com.procttor.api.repository.UserWorkspaceRepository;
+import com.procttor.api.repository.WorkspaceRepository;
+import com.procttor.api.service.UserWorkspaceService;
 
 @RestController
-@RequestMapping("api/user-workspace")
+@RequestMapping("api/workspace-user")
 public class UserWorkspaceController {
     
     @Autowired
-    private UserWorkspaceRepository userWorkspaceRepository;
+    private UserWorkspaceService userWorkspaceService;
 
     @GetMapping
-    public List<UserWorkspace> getAllUserWorkspaces() {
-        return userWorkspaceRepository.findAll();
+    public ResponseEntity<List<UserWorkspace>> getAllUserWorkspaces() {
+        List<UserWorkspace> userWorkspaces = userWorkspaceService.getAllUserWorkspaces();
+        return new ResponseEntity<>(userWorkspaces, HttpStatus.OK);
     }
 
     @PostMapping
-    public UserWorkspace createUserWorkspace(@RequestBody UserWorkspace userWorkspace) {
-        return userWorkspaceRepository.save(userWorkspace);
+    public ResponseEntity<UserWorkspace> addUserToWorkspace(@RequestParam("workspace-id") Long id, @RequestBody UserWorkspaceDTO userWorkspaceDTO) {
+        userWorkspaceDTO.setWorkspaceId(id);
+        UserWorkspace userWorkspace = userWorkspaceService.addUserToWorkspace(userWorkspaceDTO);
+        return new ResponseEntity<>(userWorkspace, HttpStatus.CREATED);
     }
+
+    @PatchMapping
+    public ResponseEntity<UserWorkspace> updateUserWorkspaceRole(@RequestBody UserWorkspaceDTO userWorkspaceDTO) {
+        UserWorkspace userWorkspace = userWorkspaceService.updateUserWorkspaceRole(userWorkspaceDTO);
+        return new ResponseEntity<>(userWorkspace, HttpStatus.OK);
+    }
+
 }
