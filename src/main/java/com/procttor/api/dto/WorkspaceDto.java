@@ -1,34 +1,17 @@
-package com.procttor.api.model;
+package com.procttor.api.dto;
 
-import java.util.List;
+public class WorkspaceDto {
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "workspace")
-public class Workspace {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "description", nullable = true)
     private String description;
-
-    @Column(name = "image", nullable = true)
     private String image;
-
-    @OneToMany(mappedBy = "workspace")
-    private List<UserWorkspace>userWorkspaces; 
-
-    public Workspace(){
+    
+    public WorkspaceDto(){
         
     }
 
-    public Workspace(String name, String description, String image){
+    public WorkspaceDto(String name, String description, String image){
         this.name=name;
         this.description=description;
         this.image=image;        
