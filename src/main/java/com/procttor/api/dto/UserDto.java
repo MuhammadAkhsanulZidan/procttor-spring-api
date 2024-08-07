@@ -1,7 +1,9 @@
 package com.procttor.api.dto;
 
+import java.util.UUID;
+
 public class UserDto {
-    private Long id;
+    private String uuid;
     private String name;
     private String email;
 
@@ -9,18 +11,18 @@ public class UserDto {
         
     }
 
-    public UserDto(Long id, String name, String email){
-        this.id = id;
+    public UserDto(String uuid, String name, String email){
+        this.uuid = uuid;
         this.name=name;
         this.email=email;
     }
 
-    public Long getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

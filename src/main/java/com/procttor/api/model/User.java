@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
     
     @Column(name = "name", nullable = false)
@@ -19,6 +20,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "uuid", nullable = false)
+    private String uuid;
 
     @OneToMany(mappedBy = "user")
     private List<UserWorkspace>userWorkspaces; 
@@ -39,6 +43,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

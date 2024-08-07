@@ -37,8 +37,8 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody User user) {
-        UserDto savedUser = userService.createUser(user);
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        User savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
     

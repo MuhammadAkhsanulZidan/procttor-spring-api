@@ -2,6 +2,7 @@ package com.procttor.api.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,30 +36,33 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
     }
 
     @Override
-    public UserWorkspace addUserToWorkspace(UserWorkspaceDto userWorkspaceDTO) {
-        Long userId = userWorkspaceDTO.getUserId();
-        Long workspaceId = userWorkspaceDTO.getWorkspaceId();
-        int roleId = userWorkspaceDTO.getRoleId();
+    public UserWorkspace addUserToWorkspace(UUID workspaceUuid, UUID userUuid, String role) {        
 
-        Optional<Workspace> optionalWorkspace = workspaceRepository.findById(workspaceId);
+        int roleId = 0;
 
-        if (!optionalWorkspace.isPresent()) {
-            throw new ResourceNotFoundException("Workspace not found");
-        }
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
+            .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
+                
+        User user = userRepository.findByUuid(userUuid)
+            .orElseThrow(()->new ResourceNotFoundException("User not found"));
         
-        Workspace workspace = optionalWorkspace.get();
-        Optional<User> optionalUser = userRepository.findById(userId);
-        
-        if (!optionalUser.isPresent()) {
-            throw new ResourceNotFoundException("User not found");
-        }
-
-        Optional<UserWorkspace> existingLink = userWorkspaceRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
+        Optional<UserWorkspace> existingLink = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getId(), workspace.getId());
         if (existingLink.isPresent()) {
             throw new IllegalArgumentException("User has already been linked to this workspace");
         }
 
-        User user = optionalUser.get();
+        switch (role.toLowerCase()) {
+            case "admin":
+                roleId = 0;
+                break;
+            case "member":
+                roleId = 1;
+                break;
+            default:
+                roleId = -1;
+                break; 
+        }
+        
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUser(user);
         userWorkspace.setWorkspace(workspace);
@@ -70,21 +74,43 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
 
     
     @Override
-    public UserWorkspace updateUserWorkspaceRole(UserWorkspaceDto userWorkspaceDTO) {
-        Optional<UserWorkspace> userWorkspaceOpt = userWorkspaceRepository.findByUserIdAndWorkspaceId(userWorkspaceDTO.getUserId(), userWorkspaceDTO.getWorkspaceId());
+    public UserWorkspace updateUserWorkspaceRole(UUID workspaceUuid, UUID userUuid, String role) {
 
-        if (userWorkspaceOpt.isPresent()) {
-            UserWorkspace userWorkspace = userWorkspaceOpt.get();
-            userWorkspace.setRoleId(userWorkspaceDTO.getRoleId());
-            UserWorkspace updatedUserWorkspace = userWorkspaceRepository.save(userWorkspace);
-            return updatedUserWorkspace;
-        } else {
-            throw new ResourceNotFoundException("UserWorkspace not found");
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
+            .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
+                
+        User user = userRepository.findByUuid(userUuid)
+            .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        
+        UserWorkspace userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getId(), workspace.getId())
+            .orElseThrow(()->new ResourceNotFoundException("User-Workspace not found"));
+
+        int roleId = 0;
+        switch (role.toLowerCase()) {
+            case "admin":
+                roleId = 0;
+                break;
+            case "member":
+                roleId = 1;
+                break;
+            default:
+                roleId = -1;
+                break; 
         }
+        
+        userWorkspace.setRoleId(roleId);
+        UserWorkspace updatedUserWorkspace = userWorkspaceRepository.save(userWorkspace);
+        return updatedUserWorkspace;
     }
 
     @Override
-    public void detachUserWorkspace(Long userId, Long workspaceId) {
-        userWorkspaceRepository.deleteByUserIdAndWorkspaceId(userId, workspaceId);
+    public void detachUserWorkspace(UUID userUuid, UUID workspaceUuid) {
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
+            .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
+                
+        User user = userRepository.findByUuid(userUuid)
+            .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        
+        userWorkspaceRepository.deleteByUserIdAndWorkspaceId(user.getId(), workspace.getId());
     }
 }

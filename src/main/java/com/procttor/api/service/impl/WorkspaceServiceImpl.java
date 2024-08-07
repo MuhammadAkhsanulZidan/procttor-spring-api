@@ -3,6 +3,7 @@ package com.procttor.api.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +28,9 @@ import com.procttor.api.model.UserWorkspace;
 import com.procttor.api.model.Workspace;
 import com.procttor.api.repository.UserWorkspaceRepository;
 import com.procttor.api.repository.WorkspaceRepository;
+import com.procttor.api.security.CustomUserDetails;
 import com.procttor.api.service.WorkspaceService;
+import com.procttor.api.util.Role;
 import com.procttor.api.util.CustomPage;
 
 @Service
@@ -42,7 +47,22 @@ public class WorkspaceServiceImpl implements WorkspaceService{
 
     @Override
     public Workspace createWorkspace(Workspace workspace) {
+
         Workspace savedWorkspace = workspaceRepository.save(workspace);
+    
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    
+    if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = customUserDetails.getUser(); 
+        UserWorkspace userWorkspace = new UserWorkspace();
+        userWorkspace.setUser(user);
+        userWorkspace.setWorkspace(savedWorkspace);
+        userWorkspace.setRoleId(Role.ADMIN); 
+        userWorkspaceRepository.save(userWorkspace);
+    } else {
+        throw new IllegalStateException("Unable to retrieve user details from authentication context");
+    }
         return savedWorkspace;
     }
 
@@ -53,15 +73,15 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     }
 
     @Override
-    public Workspace getWorkspaceByID(Long workspaceId) {
-        Workspace workspace = workspaceRepository.findById(workspaceId)
+    public Workspace getWorkspaceByID(UUID workspaceUuid) {
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
                         .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
         return workspace;
     }
 
     @Override
-    public Workspace updateWorkspace(Long workspaceId, Map<String, Object> updates) {
-        Optional<Workspace> optionalWorkspace = workspaceRepository.findById(workspaceId);
+    public Workspace updateWorkspace(UUID workspaceUuid, Map<String, Object> updates) {
+        Optional<Workspace> optionalWorkspace = workspaceRepository.findByUuid(workspaceUuid);
         if(optionalWorkspace.isPresent()){
             Workspace workspace = optionalWorkspace.get();
             updates.forEach((key, value)->{
@@ -92,14 +112,17 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     }
 
     @Override
-    public void deleteWorkspace(Long workspaceId) {
-        workspaceRepository.deleteById(workspaceId);
+    public void deleteWorkspace(UUID workspaceUuid) {
+        workspaceRepository.deleteByUuid(workspaceUuid);
     }
 
     @Override
-    public CustomPage<UserWithRoleDto> getAllUsers(Long workspaceId, int page, int size) {
+    public CustomPage<UserWithRoleDto> getAllUsers(UUID workspaceUuid, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("roleId").ascending().and(Sort.by("user.id").ascending()));
-        Page<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspaceId, pageable);
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
+                        .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
+        
+        Page<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspace.getId(), pageable);
 
         List<UserWithRoleDto> content = userWorkspaces.getContent().stream()
         .map(userWorkspace -> {
@@ -116,8 +139,10 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         return new CustomPage<>(content, userWorkspaces.getTotalElements(), userWorkspaces.getTotalPages());
     }
 
-    public List<UserWithRoleDto> searchUsersByEmail(Long workspaceId, String email) {
-        List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceIdAndUserEmailContaining(workspaceId, email);
+    public List<UserWithRoleDto> searchUsersByEmail(UUID workspaceUuid, String email) {
+        Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
+                        .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
+        List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceIdAndUserEmailContaining(workspace.getId(), email);
 
         if (userWorkspaces.isEmpty()) {
             throw new ResourceNotFoundException("No users found in the workspace with email containing: " + email);

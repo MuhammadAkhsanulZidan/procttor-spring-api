@@ -22,22 +22,25 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        // Implement logic for handling permission based on targetDomainObject and permission
         if (targetDomainObject instanceof Long && permission instanceof String) {
-            Long workspaceId = (Long) targetDomainObject;
+            Long targetId = (Long) targetDomainObject;
             String perm = (String) permission;
-            return hasRoleInWorkspace(authentication, workspaceId, Integer.parseInt(perm));
+
+            if (perm.startsWith("workspace:")) {
+                int requiredRole = Integer.parseInt(perm.split(":")[1]);
+                return hasRoleInWorkspace(authentication, targetId, requiredRole);
+            } 
+            
+            // else if (perm.startsWith("project:")) {
+            //     int requiredRole = Integer.parseInt(perm.split(":")[1]);
+            //     return hasRoleInProject(authentication, targetId, requiredRole);
+            // }
         }
         return false;
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        // This can be used if you have specific logic for targetId and targetType
-        // Uncomment and implement if you need to use targetId and targetType
-        // if ("Project".equals(targetType)) {
-        //     return hasRoleInProject(authentication, (Long) targetId, (String) permission);
-        // }
         return false;
     }
 
