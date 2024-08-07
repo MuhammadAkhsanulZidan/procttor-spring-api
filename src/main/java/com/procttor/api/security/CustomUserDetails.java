@@ -10,6 +10,7 @@ import com.procttor.api.model.User;
 
 public class CustomUserDetails implements UserDetails{
 
+    private final User user;
     private String username;
     private String password;
     Collection<? extends GrantedAuthority> authorities;
@@ -18,6 +19,7 @@ public class CustomUserDetails implements UserDetails{
         this.username = user.getEmail();
         this.password = user.getPassword();
         this.authorities = Collections.emptyList();
+        this.user = user;
     }
 
     @Override
@@ -34,4 +36,9 @@ public class CustomUserDetails implements UserDetails{
     public String getUsername() {
         return username;
     }
+
+    public User getUser() {
+        return user;
+    }
+
 }

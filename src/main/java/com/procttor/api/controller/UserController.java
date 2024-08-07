@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.procttor.api.dto.UserDto;
+import com.procttor.api.dto.WorkspaceDto;
 import com.procttor.api.model.User;
+import com.procttor.api.model.Workspace;
 import com.procttor.api.repository.UserRepository;
 import com.procttor.api.service.UserService;
 
@@ -38,6 +40,12 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(@PathVariable(value="id") Long userId) {
         UserDto userDTO = userService.getUserByID(userId);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);        
+    }
+
+    @GetMapping("/{id}/workspaces")
+    public ResponseEntity<List<Workspace>> getAllUsers(@PathVariable Long id) {
+        List<Workspace> workspace = userService.getAllWorkspaces(id);
+        return new ResponseEntity<>(workspace, HttpStatus.OK);
     }
     
     @PatchMapping("/{id}")

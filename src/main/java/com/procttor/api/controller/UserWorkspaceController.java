@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.procttor.api.dto.UserWorkspaceDTO;
+import com.procttor.api.dto.UserWorkspaceDto;
 import com.procttor.api.model.User;
 import com.procttor.api.model.UserWorkspace;
 import com.procttor.api.model.Workspace;
@@ -32,21 +33,23 @@ public class UserWorkspaceController {
     @Autowired
     private UserWorkspaceService userWorkspaceService;
 
-    @GetMapping
-    public ResponseEntity<List<UserWorkspace>> getAllUserWorkspaces() {
-        List<UserWorkspace> userWorkspaces = userWorkspaceService.getAllUserWorkspaces();
-        return new ResponseEntity<>(userWorkspaces, HttpStatus.OK);
-    }
-
+    // @GetMapping
+    // public ResponseEntity<List<UserWorkspace>> getAllUserWorkspaces() {
+    //     List<UserWorkspace> userWorkspaces = userWorkspaceService.getAllUserWorkspaces();
+    //     return new ResponseEntity<>(userWorkspaces, HttpStatus.OK);
+    // }
+    
     @PostMapping
-    public ResponseEntity<UserWorkspace> addUserToWorkspace(@RequestParam("workspace-id") Long id, @RequestBody UserWorkspaceDTO userWorkspaceDTO) {
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #userWorkspaceDTO.workspaceId, 1)")
+    public ResponseEntity<UserWorkspace> addUserToWorkspace(@RequestParam("workspace-id") Long id, @RequestBody UserWorkspaceDto userWorkspaceDTO) {
         userWorkspaceDTO.setWorkspaceId(id);
         UserWorkspace userWorkspace = userWorkspaceService.addUserToWorkspace(userWorkspaceDTO);
         return new ResponseEntity<>(userWorkspace, HttpStatus.CREATED);
     }
 
     @PatchMapping
-    public ResponseEntity<UserWorkspace> updateUserWorkspaceRole(@RequestBody UserWorkspaceDTO userWorkspaceDTO) {
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #userWorkspaceDTO.workspaceId, 1)")
+    public ResponseEntity<UserWorkspace> updateUserWorkspaceRole(@RequestBody UserWorkspaceDto userWorkspaceDTO) {
         UserWorkspace userWorkspace = userWorkspaceService.updateUserWorkspaceRole(userWorkspaceDTO);
         return new ResponseEntity<>(userWorkspace, HttpStatus.OK);
     }

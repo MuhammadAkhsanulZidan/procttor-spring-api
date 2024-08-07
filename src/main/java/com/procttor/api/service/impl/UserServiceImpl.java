@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 import com.procttor.api.dto.UserDto;
 import com.procttor.api.exception.ResourceNotFoundException;
 import com.procttor.api.model.User;
+import com.procttor.api.model.UserWorkspace;
+import com.procttor.api.model.Workspace;
 import com.procttor.api.repository.UserRepository;
+import com.procttor.api.repository.UserWorkspaceRepository;
 import com.procttor.api.service.UserService;
 
 @Service
@@ -23,6 +27,9 @@ public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
 
     @Autowired
+    private UserWorkspaceRepository userWorkspaceRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -30,6 +37,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDto createUser(User user) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email is already registered");
+        }
+        
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserDto.class);
@@ -80,5 +91,14 @@ public class UserServiceImpl implements UserService{
     @Override
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+    }
+    
+    @Override
+    public List<Workspace> getAllWorkspaces(Long userId) {
+        List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByUserId(userId);
+        List<Workspace> workspaces = userWorkspaces.stream()
+                .map(UserWorkspace::getWorkspace) 
+                .collect(Collectors.toList());
+        return workspaces; 
     }
 }

@@ -1,15 +1,9 @@
 package com.procttor.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class UserWorkspaceDto {
-    @JsonProperty("user_id")
+public class UserWithRoleDto {
     private Long userId;
-
-    @JsonProperty("workspace_id")
-    private Long workspaceId;
-
-    @JsonProperty("role_id")
+    private String name; 
+    private String email;
     private int roleId;
 
     public Long getUserId() {
@@ -20,12 +14,12 @@ public class UserWorkspaceDto {
         this.userId = userId;
     }
 
-    public Long getWorkspaceId() {
-        return workspaceId;
+    public String getName() {
+        return name;
     }
 
-    public void setWorkspaceId(Long workspaceId) {
-        this.workspaceId = workspaceId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getRoleId() {
@@ -34,5 +28,13 @@ public class UserWorkspaceDto {
 
     public void setRoleId(int roleId) {
         this.roleId = roleId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

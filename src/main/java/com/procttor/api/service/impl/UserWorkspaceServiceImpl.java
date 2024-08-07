@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.procttor.api.dto.UserWorkspaceDTO;
+import com.procttor.api.dto.UserWorkspaceDto;
 import com.procttor.api.exception.ResourceNotFoundException;
 import com.procttor.api.model.User;
 import com.procttor.api.model.UserWorkspace;
@@ -35,7 +35,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
     }
 
     @Override
-    public UserWorkspace addUserToWorkspace(UserWorkspaceDTO userWorkspaceDTO) {
+    public UserWorkspace addUserToWorkspace(UserWorkspaceDto userWorkspaceDTO) {
         Long userId = userWorkspaceDTO.getUserId();
         Long workspaceId = userWorkspaceDTO.getWorkspaceId();
         int roleId = userWorkspaceDTO.getRoleId();
@@ -55,7 +55,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
 
         Optional<UserWorkspace> existingLink = userWorkspaceRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
         if (existingLink.isPresent()) {
-            throw new RuntimeException("User has already been linked to this workspace");
+            throw new IllegalArgumentException("User has already been linked to this workspace");
         }
 
         User user = optionalUser.get();
@@ -70,7 +70,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
 
     
     @Override
-    public UserWorkspace updateUserWorkspaceRole(UserWorkspaceDTO userWorkspaceDTO) {
+    public UserWorkspace updateUserWorkspaceRole(UserWorkspaceDto userWorkspaceDTO) {
         Optional<UserWorkspace> userWorkspaceOpt = userWorkspaceRepository.findByUserIdAndWorkspaceId(userWorkspaceDTO.getUserId(), userWorkspaceDTO.getWorkspaceId());
 
         if (userWorkspaceOpt.isPresent()) {

@@ -3,20 +3,42 @@ package com.procttor.api.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.procttor.api.dto.UserDto;
+import com.procttor.api.dto.UserWithRoleDto;
 import com.procttor.api.exception.ResourceNotFoundException;
+import com.procttor.api.model.User;
+import com.procttor.api.model.UserWorkspace;
 import com.procttor.api.model.Workspace;
+import com.procttor.api.repository.UserWorkspaceRepository;
 import com.procttor.api.repository.WorkspaceRepository;
 import com.procttor.api.service.WorkspaceService;
+import com.procttor.api.util.CustomPage;
 
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService{
 
     @Autowired
     private WorkspaceRepository workspaceRepository;
+
+    @Autowired
+    private UserWorkspaceRepository userWorkspaceRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public Workspace createWorkspace(Workspace workspace) {
@@ -73,5 +95,41 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     public void deleteWorkspace(Long workspaceId) {
         workspaceRepository.deleteById(workspaceId);
     }
-    
+
+    @Override
+    public CustomPage<UserWithRoleDto> getAllUsers(Long workspaceId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("roleId").ascending().and(Sort.by("user.id").ascending()));
+        Page<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspaceId, pageable);
+
+        List<UserWithRoleDto> content = userWorkspaces.getContent().stream()
+        .map(userWorkspace -> {
+            UserWithRoleDto userWithRoleDto = new UserWithRoleDto();
+            User user = userWorkspace.getUser();
+            userWithRoleDto.setUserId(user.getId());
+            userWithRoleDto.setName(user.getName());
+            userWithRoleDto.setEmail(user.getEmail());
+            userWithRoleDto.setRoleId(userWorkspace.getRoleId());
+            return userWithRoleDto;  // Ensure the DTO is returned
+        })
+        .collect(Collectors.toList());
+
+        return new CustomPage<>(content, userWorkspaces.getTotalElements(), userWorkspaces.getTotalPages());
+    }
+
+    public List<UserWithRoleDto> searchUsersByEmail(Long workspaceId, String email) {
+        List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceIdAndUserEmailContaining(workspaceId, email);
+
+        if (userWorkspaces.isEmpty()) {
+            throw new ResourceNotFoundException("No users found in the workspace with email containing: " + email);
+        }
+
+        return userWorkspaces.stream().map(userWorkspace -> {
+            UserWithRoleDto userWithRoleDto = new UserWithRoleDto();
+            userWithRoleDto.setUserId(userWorkspace.getUser().getId());
+            userWithRoleDto.setName(userWorkspace.getUser().getName());
+            userWithRoleDto.setEmail(userWorkspace.getUser().getEmail());
+            userWithRoleDto.setRoleId(userWorkspace.getRoleId());
+            return userWithRoleDto;
+        }).collect(Collectors.toList());
+    }
 }

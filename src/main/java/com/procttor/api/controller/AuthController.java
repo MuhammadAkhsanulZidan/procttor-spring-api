@@ -10,11 +10,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.procttor.api.dto.JwtTokenDto;
 import com.procttor.api.dto.LoginDto;
 import com.procttor.api.dto.UserDto;
 import com.procttor.api.model.User;
 import com.procttor.api.security.JwtService;
 import com.procttor.api.service.UserService;
+
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -39,18 +43,18 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<JwtTokenDto> loginUser(@RequestBody LoginDto loginDto) {
         try {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
             );
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            throw new BadCredentialsException("invalid email or password");
         }
 
         String token = jwtService.generateToken(loginDto.getEmail());
 
-        return ResponseEntity.ok(token);
+        return new ResponseEntity<>(new JwtTokenDto(token), HttpStatus.OK);
     }
 
 }

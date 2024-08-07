@@ -4,10 +4,6 @@ public class LoginDto {
     private String email;
     private String password;
 
-    public LoginDto(){
-
-    }
-
     public LoginDto(String email, String password){
         this.email=email;
         this.password=password;
@@ -27,4 +23,6 @@ public class LoginDto {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
 }
