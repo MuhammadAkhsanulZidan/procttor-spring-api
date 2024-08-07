@@ -3,7 +3,6 @@ package com.procttor.api.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -73,14 +72,14 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     }
 
     @Override
-    public Workspace getWorkspaceByID(UUID workspaceUuid) {
+    public Workspace getWorkspaceByID(String workspaceUuid) {
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
                         .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
         return workspace;
     }
 
     @Override
-    public Workspace updateWorkspace(UUID workspaceUuid, Map<String, Object> updates) {
+    public Workspace updateWorkspace(String workspaceUuid, Map<String, Object> updates) {
         Optional<Workspace> optionalWorkspace = workspaceRepository.findByUuid(workspaceUuid);
         if(optionalWorkspace.isPresent()){
             Workspace workspace = optionalWorkspace.get();
@@ -112,12 +111,12 @@ public class WorkspaceServiceImpl implements WorkspaceService{
     }
 
     @Override
-    public void deleteWorkspace(UUID workspaceUuid) {
+    public void deleteWorkspace(String workspaceUuid) {
         workspaceRepository.deleteByUuid(workspaceUuid);
     }
 
     @Override
-    public CustomPage<UserWithRoleDto> getAllUsers(UUID workspaceUuid, int page, int size) {
+    public CustomPage<UserWithRoleDto> getAllUsers(String workspaceUuid, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("roleId").ascending().and(Sort.by("user.id").ascending()));
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
                         .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
@@ -139,7 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService{
         return new CustomPage<>(content, userWorkspaces.getTotalElements(), userWorkspaces.getTotalPages());
     }
 
-    public List<UserWithRoleDto> searchUsersByEmail(UUID workspaceUuid, String email) {
+    public List<UserWithRoleDto> searchUsersByEmail(String workspaceUuid, String email) {
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
                         .orElseThrow(()-> new ResourceNotFoundException("Workspace not found"));
         List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceIdAndUserEmailContaining(workspace.getId(), email);

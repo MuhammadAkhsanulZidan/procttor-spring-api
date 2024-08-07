@@ -2,7 +2,6 @@ package com.procttor.api.service.impl;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
     }
 
     @Override
-    public UserWorkspace addUserToWorkspace(UUID workspaceUuid, UUID userUuid, String role) {        
+    public UserWorkspace addUserToWorkspace(String workspaceUuid, String userUuid, String role) {        
 
         int roleId = 0;
 
@@ -74,7 +73,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
 
     
     @Override
-    public UserWorkspace updateUserWorkspaceRole(UUID workspaceUuid, UUID userUuid, String role) {
+    public UserWorkspace updateUserWorkspaceRole(String workspaceUuid, String userUuid, String role) {
 
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
             .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
@@ -104,7 +103,7 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
     }
 
     @Override
-    public void detachUserWorkspace(UUID userUuid, UUID workspaceUuid) {
+    public void detachUserWorkspace(String userUuid, String workspaceUuid) {
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
             .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
                 

@@ -26,14 +26,14 @@ public class UserWorkspaceController {
     
     @PostMapping
     @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #userWorkspaceDTO.workspaceId, T(com.procttor.api.util.Role).ADMIN)")
-    public ResponseEntity<UserWorkspace> addUserToWorkspace(@RequestParam("id") UUID id, @RequestParam("add") UUID userId, @RequestParam("role") String role) {
+    public ResponseEntity<UserWorkspace> addUserToWorkspace(@RequestParam("id") String id, @RequestParam("add") String userId, @RequestParam("role") String role) {
         UserWorkspace userWorkspace = userWorkspaceService.addUserToWorkspace(id, userId, role);
         return new ResponseEntity<>(userWorkspace, HttpStatus.CREATED);
     }
 
     @PatchMapping
     @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #userWorkspaceDTO.workspaceId, Role.ADMIN)")
-    public ResponseEntity<UserWorkspace> updateUserWorkspaceRole(@RequestParam("id") UUID id, @RequestParam("add") UUID userId, @RequestParam("role") String role) {
+    public ResponseEntity<UserWorkspace> updateUserWorkspaceRole(@RequestParam("id") String id, @RequestParam("add") String userId, @RequestParam("role") String role) {
         UserWorkspace userWorkspace = userWorkspaceService.updateUserWorkspaceRole(id, userId, role);
         return new ResponseEntity<>(userWorkspace, HttpStatus.OK);
     }

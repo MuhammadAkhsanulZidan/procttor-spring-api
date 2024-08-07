@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -59,14 +58,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto getUserByID(UUID uuid)  {
+    public UserDto getUserByID(String uuid)  {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
         return modelMapper.map(user, UserDto.class);
     }
 
     @Override
-    public UserDto updateUser(UUID uuid, Map<String, Object> updates) {
+    public UserDto updateUser(String uuid, Map<String, Object> updates) {
         Optional<User> optionalUser = userRepository.findByUuid(uuid);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -91,12 +90,12 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(UUID uuid)  {
+    public void deleteUser(String uuid)  {
         userRepository.deleteByUuid(uuid);
     }
     
     @Override
-    public List<Workspace> getAllWorkspaces(UUID uuid) {
+    public List<Workspace> getAllWorkspaces(String uuid) {
         User user = userRepository.findByUuid(uuid)
                     .orElseThrow(()->new ResourceNotFoundException("User not found"));
         Long userId = user.getId();

@@ -1,7 +1,6 @@
 package com.procttor.api.model;
 
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -24,7 +23,7 @@ public class Workspace {
     private String image;
 
     @Column(name = "uuid", nullable = false)
-    private UUID uuid;
+    private String uuid;
 
     @OneToMany(mappedBy = "workspace")
     private List<UserWorkspace>userWorkspaces; 
@@ -47,11 +46,11 @@ public class Workspace {
         this.id = id;
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

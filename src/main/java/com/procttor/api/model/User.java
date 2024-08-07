@@ -1,6 +1,7 @@
 package com.procttor.api.model;
 
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -28,13 +29,14 @@ public class User {
     private List<UserWorkspace>userWorkspaces; 
 
     public User(){
-
+        this.uuid=UUID.randomUUID().toString();
     }
 
     public User(String name, String email, String password){
         this.name=name;
         this.email=email;
         this.password=password;
+        this.uuid=UUID.randomUUID().toString();
     }
 
     public Long getId() {

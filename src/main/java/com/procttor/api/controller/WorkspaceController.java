@@ -2,7 +2,6 @@ package com.procttor.api.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,14 +35,14 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Workspace> getWorkspaceById(@PathVariable UUID id) {
+    public ResponseEntity<Workspace> getWorkspaceById(@PathVariable String id) {
         Workspace workspace = workspaceService.getWorkspaceByID(id);
         return new ResponseEntity<>(workspace, HttpStatus.OK);
     }
 
     @GetMapping("/{workspaceId}/users")
     public ResponseEntity<CustomPage<UserWithRoleDto>> getAllUsers(
-        @PathVariable UUID workspaceId,
+        @PathVariable String workspaceId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
         CustomPage<UserWithRoleDto> userDtos = workspaceService.getAllUsers(workspaceId, page, size);
@@ -51,20 +50,20 @@ public class WorkspaceController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Workspace> patchUser(@PathVariable UUID id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<Workspace> patchUser(@PathVariable String id, @RequestBody Map<String, Object> updates) {
         Workspace patchedWorkspace = workspaceService.updateWorkspace(id, updates);
         return new ResponseEntity<>(patchedWorkspace, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteWorkspace(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteWorkspace(@PathVariable String id) {
         workspaceService.deleteWorkspace(id);
         return new ResponseEntity<>("Workspace successfully deleted", HttpStatus.OK);
     }
 
     @GetMapping("/{workspaceId}/users/search")
     public ResponseEntity<List<UserWithRoleDto>> searchUsersByEmail(
-            @PathVariable UUID workspaceId,
+            @PathVariable String workspaceId,
             @RequestParam String email) {
 
         List<UserWithRoleDto> users = workspaceService.searchUsersByEmail(workspaceId, email);

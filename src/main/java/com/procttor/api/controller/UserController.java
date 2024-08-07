@@ -35,25 +35,25 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable(value="id") UUID id) throws Exception {
+    public ResponseEntity<UserDto> getUserById(@PathVariable(value="id") String id) throws Exception {
         UserDto userDTO = userService.getUserByID(id);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);        
     }
 
     @GetMapping("/{id}/workspaces")
-    public ResponseEntity<List<Workspace>> getAllUsers(@PathVariable UUID id) throws Exception{
+    public ResponseEntity<List<Workspace>> getAllUsers(@PathVariable String id) throws Exception{
          List<Workspace> workspace = userService.getAllWorkspaces(id);
         return new ResponseEntity<>(workspace, HttpStatus.OK);
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDto> patchUser(@PathVariable UUID id, @RequestBody Map<String, Object> updates) throws Exception{
+    public ResponseEntity<UserDto> patchUser(@PathVariable String id, @RequestBody Map<String, Object> updates) throws Exception{
         UserDto patchedUser = userService.updateUser(id, updates);
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable UUID id) throws Exception {
+    public ResponseEntity<String> deleteUser(@PathVariable String id) throws Exception {
         userService.deleteUser(id);
         return new ResponseEntity<>("User successfully deleted", HttpStatus.OK);
     }

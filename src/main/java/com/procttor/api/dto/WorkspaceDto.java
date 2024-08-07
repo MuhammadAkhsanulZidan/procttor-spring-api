@@ -1,10 +1,8 @@
 package com.procttor.api.dto;
 
-import java.util.UUID;
-
 public class WorkspaceDto {
 
-    private UUID uuid;
+    private String uuid;
     private String name;
     private String description;
     private String image;
@@ -13,18 +11,18 @@ public class WorkspaceDto {
         
     }
 
-    public WorkspaceDto(UUID uuid, String name, String description, String image){
+    public WorkspaceDto(String uuid, String name, String description, String image){
         this.uuid=uuid;
         this.name=name;
         this.description=description;
         this.image=image;        
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
