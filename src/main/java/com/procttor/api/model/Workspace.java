@@ -1,6 +1,8 @@
 package com.procttor.api.model;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -23,19 +25,23 @@ public class Workspace {
     private String image;
 
     @Column(name = "uuid", nullable = false)
-    private String uuid;
+    private UUID uuid;
 
     @OneToMany(mappedBy = "workspace")
     private List<UserWorkspace>userWorkspaces; 
 
+    @OneToMany(mappedBy="workspace", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<Project> projects;
+
     public Workspace(){
-        
+        this.uuid=UUID.randomUUID();
     }
 
     public Workspace(String name, String description, String image){
         this.name=name;
         this.description=description;
-        this.image=image;        
+        this.image=image;
+        this.uuid=UUID.randomUUID();        
     }
 
     public Long getId() {
@@ -46,11 +52,11 @@ public class Workspace {
         this.id = id;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -76,5 +82,13 @@ public class Workspace {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
     }
 }

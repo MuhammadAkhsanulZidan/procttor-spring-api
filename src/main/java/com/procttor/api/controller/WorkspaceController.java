@@ -2,15 +2,18 @@ package com.procttor.api.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.procttor.api.dto.UserDto;
 import com.procttor.api.dto.UserWithRoleDto;
+import com.procttor.api.dto.WorkspaceDto;
 import com.procttor.api.model.Workspace;
 import com.procttor.api.service.WorkspaceService;
 import com.procttor.api.util.CustomPage;
@@ -22,52 +25,49 @@ public class WorkspaceController {
     @Autowired
     private WorkspaceService workspaceService;
 
-    @GetMapping
-    public ResponseEntity<List<Workspace>> getAllWorkspaces() {
-        List<Workspace> workspaces = workspaceService.getAllWorkspaces();
-        return new ResponseEntity<>(workspaces, HttpStatus.OK);
-    }
-
     @PostMapping
-    public ResponseEntity<Workspace> createWorkspace(@RequestBody Workspace workspace) {
-        Workspace savedWorkspace = workspaceService.createWorkspace(workspace);
+    public ResponseEntity<WorkspaceDto> createWorkspace(@RequestBody Workspace workspace) {
+        WorkspaceDto savedWorkspace = workspaceService.createWorkspace(workspace);
         return new ResponseEntity<>(savedWorkspace, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Workspace> getWorkspaceById(@PathVariable String id) {
-        Workspace workspace = workspaceService.getWorkspaceByID(id);
+    @GetMapping("/{wid}")
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #wid, T(com.procttor.api.util.Role).ANY)")
+    public ResponseEntity<WorkspaceDto> getWorkspaceById(@PathVariable UUID wid) {
+        WorkspaceDto workspace = workspaceService.getWorkspaceByID(wid);
         return new ResponseEntity<>(workspace, HttpStatus.OK);
     }
 
-    @GetMapping("/{workspaceId}/users")
+    @GetMapping("/{wid}/users")
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #wid, T(com.procttor.api.util.Role).ANY)")
     public ResponseEntity<CustomPage<UserWithRoleDto>> getAllUsers(
-        @PathVariable String workspaceId,
+        @PathVariable UUID wid,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
-        CustomPage<UserWithRoleDto> userDtos = workspaceService.getAllUsers(workspaceId, page, size);
+        CustomPage<UserWithRoleDto> userDtos = workspaceService.getAllUsers(wid, page, size);
         return new ResponseEntity<>(userDtos, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Workspace> patchUser(@PathVariable String id, @RequestBody Map<String, Object> updates) {
-        Workspace patchedWorkspace = workspaceService.updateWorkspace(id, updates);
+    @PatchMapping("/{wid}")
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #wid, T(com.procttor.api.util.Role).ADMIN)")
+    public ResponseEntity<WorkspaceDto> patchUser(@PathVariable UUID wid, @RequestBody Map<String, Object> updates) {
+        WorkspaceDto patchedWorkspace = workspaceService.updateWorkspace(wid, updates);
         return new ResponseEntity<>(patchedWorkspace, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteWorkspace(@PathVariable String id) {
-        workspaceService.deleteWorkspace(id);
+    @DeleteMapping("/{wid}")
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #wid, T(com.procttor.api.util.Role).ADMIN)")
+    public ResponseEntity<String> deleteWorkspace(@PathVariable UUID wid) {
+        workspaceService.deleteWorkspace(wid);
         return new ResponseEntity<>("Workspace successfully deleted", HttpStatus.OK);
     }
 
-    @GetMapping("/{workspaceId}/users/search")
+    @GetMapping("/{wid}/users/search")
+    @PreAuthorize("@customPermissionEvaluator.hasRoleInWorkspace(authentication, #wid, T(com.procttor.api.util.Role).ANY)")
     public ResponseEntity<List<UserWithRoleDto>> searchUsersByEmail(
-            @PathVariable String workspaceId,
+            @PathVariable UUID wid,
             @RequestParam String email) {
-
-        List<UserWithRoleDto> users = workspaceService.searchUsersByEmail(workspaceId, email);
+        List<UserWithRoleDto> users = workspaceService.searchUsersByEmail(wid, email);
         return ResponseEntity.ok(users);
     }
-
 }

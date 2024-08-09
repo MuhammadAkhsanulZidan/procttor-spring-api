@@ -1,10 +1,19 @@
 package com.procttor.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class WorkspaceDto {
 
+    @JsonProperty("id")
     private String uuid;
+
+    @JsonProperty("name")
     private String name;
+
+    @JsonProperty("description")
     private String description;
+
+    @JsonProperty("image")
     private String image;
     
     public WorkspaceDto(){

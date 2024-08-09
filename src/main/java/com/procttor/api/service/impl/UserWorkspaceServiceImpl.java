@@ -1,12 +1,17 @@
 package com.procttor.api.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.procttor.api.dto.UserDto;
 import com.procttor.api.dto.UserWorkspaceDto;
+import com.procttor.api.dto.WorkspaceDto;
 import com.procttor.api.exception.ResourceNotFoundException;
 import com.procttor.api.model.User;
 import com.procttor.api.model.UserWorkspace;
@@ -28,14 +33,21 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
     @Autowired
     private UserWorkspaceRepository userWorkspaceRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public List<UserWorkspace> getAllUserWorkspaces() {
+    public List<UserWorkspaceDto> getAllUserWorkspaces() {
         List<UserWorkspace>userWorkspaces=userWorkspaceRepository.findAll();
-        return userWorkspaces;
+        List<UserWorkspaceDto> userWorkspaceDtos = new ArrayList<>();
+        for(UserWorkspace userWorkspace: userWorkspaces){
+            userWorkspaceDtos.add(mapToUserWorkspaceDto(userWorkspace));
+        }
+        return userWorkspaceDtos;
     }
 
     @Override
-    public UserWorkspace addUserToWorkspace(String workspaceUuid, String userUuid, String role) {        
+    public UserWorkspaceDto addUserToWorkspace(UUID workspaceUuid, UUID userUuid, String role) {        
 
         int roleId = 0;
 
@@ -68,12 +80,12 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
         userWorkspace.setRoleId(roleId);
 
         UserWorkspace savedUserWorkspace = userWorkspaceRepository.save(userWorkspace);
-        return savedUserWorkspace;
+        return mapToUserWorkspaceDto(savedUserWorkspace);
     }
 
     
     @Override
-    public UserWorkspace updateUserWorkspaceRole(String workspaceUuid, String userUuid, String role) {
+    public UserWorkspaceDto updateUserWorkspaceRole(UUID workspaceUuid, UUID userUuid, String role) {
 
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
             .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
@@ -99,11 +111,11 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
         
         userWorkspace.setRoleId(roleId);
         UserWorkspace updatedUserWorkspace = userWorkspaceRepository.save(userWorkspace);
-        return updatedUserWorkspace;
+        return mapToUserWorkspaceDto(updatedUserWorkspace);
     }
 
     @Override
-    public void detachUserWorkspace(String userUuid, String workspaceUuid) {
+    public void detachUserWorkspace(UUID userUuid, UUID workspaceUuid) {
         Workspace workspace = workspaceRepository.findByUuid(workspaceUuid)
             .orElseThrow(()->new ResourceNotFoundException("Workspace not found"));
                 
@@ -111,5 +123,14 @@ public class UserWorkspaceServiceImpl implements UserWorkspaceService{
             .orElseThrow(()->new ResourceNotFoundException("User not found"));
         
         userWorkspaceRepository.deleteByUserIdAndWorkspaceId(user.getId(), workspace.getId());
+    }
+
+    private UserWorkspaceDto mapToUserWorkspaceDto(UserWorkspace userWorkspace){
+        UserWorkspaceDto userWorkspaceDto = 
+            new UserWorkspaceDto(
+                modelMapper.map(userWorkspace.getUser(), UserDto.class),
+                modelMapper.map(userWorkspace.getWorkspace(),WorkspaceDto.class),
+                userWorkspace.getRoleId());
+        return userWorkspaceDto;
     }
 }

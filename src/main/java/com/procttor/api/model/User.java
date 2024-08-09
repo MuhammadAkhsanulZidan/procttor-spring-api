@@ -23,20 +23,23 @@ public class User {
     private String password;
 
     @Column(name = "uuid", nullable = false)
-    private String uuid;
+    private UUID uuid;
 
     @OneToMany(mappedBy = "user")
     private List<UserWorkspace>userWorkspaces; 
 
+    @OneToMany(mappedBy = "user")
+    private List<UserProject>userProjects; 
+
     public User(){
-        this.uuid=UUID.randomUUID().toString();
+        this.uuid=UUID.randomUUID();
     }
 
     public User(String name, String email, String password){
         this.name=name;
         this.email=email;
         this.password=password;
-        this.uuid=UUID.randomUUID().toString();
+        this.uuid=UUID.randomUUID();
     }
 
     public Long getId() {
@@ -47,11 +50,11 @@ public class User {
         this.id = id;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 

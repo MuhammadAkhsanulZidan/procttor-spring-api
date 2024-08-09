@@ -2,6 +2,7 @@ package com.procttor.api.security;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,12 +14,14 @@ public class CustomUserDetails implements UserDetails{
     private final User user;
     private String username;
     private String password;
+    private UUID uuid;
     Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user){
         this.username = user.getEmail();
         this.password = user.getPassword();
         this.authorities = Collections.emptyList();
+        this.uuid = user.getUuid();
         this.user = user;
     }
 
@@ -39,6 +42,10 @@ public class CustomUserDetails implements UserDetails{
 
     public User getUser() {
         return user;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
 }

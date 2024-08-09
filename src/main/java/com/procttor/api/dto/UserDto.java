@@ -2,26 +2,34 @@ package com.procttor.api.dto;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserDto {
-    private String uuid;
+
+    @JsonProperty("id")
+    private UUID uuid;
+
+    @JsonProperty("name")
     private String name;
+
+    @JsonProperty("email")
     private String email;
 
     public UserDto(){
         
     }
 
-    public UserDto(String uuid, String name, String email){
+    public UserDto(UUID uuid, String name, String email){
         this.uuid = uuid;
         this.name=name;
         this.email=email;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 

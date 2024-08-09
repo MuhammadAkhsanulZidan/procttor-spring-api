@@ -1,16 +1,28 @@
 package com.procttor.api.dto;
 
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserWithRoleDto {
-    private Long userId;
+
+    @JsonProperty("id")
+    private UUID userId;
+
+    @JsonProperty("name")
     private String name; 
+
+    @JsonProperty("email")
     private String email;
+
+    @JsonProperty("role_id")
     private int roleId;
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

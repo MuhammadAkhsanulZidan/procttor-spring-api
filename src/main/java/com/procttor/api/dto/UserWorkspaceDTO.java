@@ -3,33 +3,39 @@ package com.procttor.api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserWorkspaceDto {
-    @JsonProperty("user_id")
-    private Long userId;
+    @JsonProperty("user")
+    private UserDto userDto;
 
-    @JsonProperty("workspace_id")
-    private Long workspaceId;
+    @JsonProperty("workspace")
+    private WorkspaceDto workspaceDto;
 
     @JsonProperty("role_id")
     private int roleId;
 
-    public Long getUserId() {
-        return userId;
+    public UserWorkspaceDto(UserDto userDto, WorkspaceDto workspaceDto, int roleId){
+        this.userDto = userDto;
+        this.workspaceDto = workspaceDto;
+        this.roleId = roleId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public UserDto getUserDto() {
+        return userDto;
     }
 
-    public Long getWorkspaceId() {
-        return workspaceId;
-    }
-
-    public void setWorkspaceId(Long workspaceId) {
-        this.workspaceId = workspaceId;
+    public WorkspaceDto getWorkspaceDto() {
+        return workspaceDto;
     }
 
     public int getRoleId() {
         return roleId;
+    }
+
+    public void setUserDto(UserDto userDto) {
+        this.userDto = userDto;
+    }
+
+    public void setWorkspaceDto(WorkspaceDto workspaceDto) {
+        this.workspaceDto = workspaceDto;
     }
 
     public void setRoleId(int roleId) {

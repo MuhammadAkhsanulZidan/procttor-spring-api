@@ -7,11 +7,14 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.procttor.api.dto.UserDto;
+import com.procttor.api.dto.WorkspaceDto;
 import com.procttor.api.model.User;
 import com.procttor.api.model.Workspace;
+import com.procttor.api.security.CustomUserDetails;
 import com.procttor.api.service.UserService;
 
 
@@ -22,39 +25,31 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() throws Exception {
-        List<UserDto> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User savedUser = userService.createUser(user);
+    public ResponseEntity<UserDto> createUser(@RequestBody User user) {
+        UserDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable(value="id") String id) throws Exception {
-        UserDto userDTO = userService.getUserByID(id);
+    @GetMapping
+    public ResponseEntity<UserDto> getUserByUuid(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID uuid = userDetails.getUuid();
+        UserDto userDTO = userService.getUserByID(uuid);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);        
     }
 
-    @GetMapping("/{id}/workspaces")
-    public ResponseEntity<List<Workspace>> getAllUsers(@PathVariable String id) throws Exception{
-         List<Workspace> workspace = userService.getAllWorkspaces(id);
+    @GetMapping("/workspaces")
+    public ResponseEntity<List<WorkspaceDto>> getAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails){
+        UUID uuid = userDetails.getUuid();
+        List<WorkspaceDto> workspace = userService.getAllWorkspaces(uuid);
         return new ResponseEntity<>(workspace, HttpStatus.OK);
     }
     
-    @PatchMapping("/{id}")
-    public ResponseEntity<UserDto> patchUser(@PathVariable String id, @RequestBody Map<String, Object> updates) throws Exception{
-        UserDto patchedUser = userService.updateUser(id, updates);
+    @PatchMapping
+    public ResponseEntity<UserDto> patchUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, Object> updates){
+        UUID uuid = userDetails.getUuid();
+        UserDto patchedUser = userService.updateUser(uuid, updates);
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String id) throws Exception {
-        userService.deleteUser(id);
-        return new ResponseEntity<>("User successfully deleted", HttpStatus.OK);
-    }
 }

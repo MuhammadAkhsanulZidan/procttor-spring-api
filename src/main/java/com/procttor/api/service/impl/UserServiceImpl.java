@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.procttor.api.dto.UserDto;
-import com.procttor.api.dto.mapper.UserMapper;
+import com.procttor.api.dto.WorkspaceDto;
 import com.procttor.api.exception.ResourceNotFoundException;
 import com.procttor.api.model.User;
 import com.procttor.api.model.UserWorkspace;
@@ -37,35 +41,36 @@ public class UserServiceImpl implements UserService{
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public User createUser(User user) {
+    public UserDto createUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already registered");
         }
         
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        return savedUser;
+        return modelMapper.map(savedUser, UserDto.class);
     }
 
     @Override
-    public List<UserDto> getAllUsers()  {
-        List<User> users = userRepository.findAll();
+    public List<UserDto> getAllUsers(int page, int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> users = userRepository.findAll(pageable);
         List<UserDto> userDtos = new ArrayList<>();
-        for(User user:users){
-            userDtos.add(UserMapper.mapToUserDto(user));
+        for(User user:users.getContent()){
+            userDtos.add(modelMapper.map(user, UserDto.class));
         }
         return userDtos;        
     }
 
     @Override
-    public UserDto getUserByID(String uuid)  {
+    public UserDto getUserByID(UUID uuid)  {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
         return modelMapper.map(user, UserDto.class);
     }
 
     @Override
-    public UserDto updateUser(String uuid, Map<String, Object> updates) {
+    public UserDto updateUser(UUID uuid, Map<String, Object> updates) {
         Optional<User> optionalUser = userRepository.findByUuid(uuid);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -90,20 +95,23 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(String uuid)  {
+    public void deleteUser(UUID uuid)  {
         userRepository.deleteByUuid(uuid);
     }
     
     @Override
-    public List<Workspace> getAllWorkspaces(String uuid) {
+    public List<WorkspaceDto> getAllWorkspaces(UUID uuid) {
         User user = userRepository.findByUuid(uuid)
                     .orElseThrow(()->new ResourceNotFoundException("User not found"));
         Long userId = user.getId();
         
         List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByUserId(userId);
-        List<Workspace> workspaces = userWorkspaces.stream()
-                .map(UserWorkspace::getWorkspace) 
-                .collect(Collectors.toList());
+        List<WorkspaceDto> workspaces = new ArrayList<>();
+
+        for(UserWorkspace userWorkspace: userWorkspaces){
+            workspaces.add(modelMapper.map(userWorkspace.getWorkspace(), WorkspaceDto.class));
+        }
+
         return workspaces; 
     }
 }
